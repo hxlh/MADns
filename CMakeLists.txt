@@ -4,7 +4,11 @@ project(MADns VERSION 0.1.0)
 include(CTest)
 enable_testing()
 
-add_executable(MADns main.c)
+add_executable(MADns 
+MADns.c
+main.c)
+
+target_link_libraries(MADns pthread)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
