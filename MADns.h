@@ -73,8 +73,10 @@ typedef struct _MADNS_CLIENT
 {
     char shutdown;
     int32_t epfd;
-    struct epoll_event *ep_event;
     void (*callback)(MADNS_PACKAGE *pkgs, size_t pkgs_cnt);
+    struct epoll_event *ep_event;
+    //1为存在,0为close()
+    char sock_live[EPOLL_SIZE];
 } MADNS_CLIENT;
 
 ///< DNS查询类型
@@ -102,6 +104,19 @@ enum enumDNS_QUERY_CATEGORY
     enumDNS_QCATEGORY_HS = 4     ///< 由MIT开发的Hesoid服务器
 };
 
+//解析dns
+static MADNS_PACKAGE *dns_resp_parse(MADNS_RESPONSE *resp);
+
+static void dns_free_client(MADNS_CLIENT* client);
+//设置非阻塞套接字
+static void dns_set_nonblock(int fd);
+//接受数据处理
+static void dns_epoll_deal(int fd, MADNS_CLIENT *client);
+
+static void dns_free_pkg(MADNS_PACKAGE *pkg, size_t cnt);
+
+static void dns_free_resp(MADNS_RESPONSE *resp);
+
 
 //格式化域名
 char *dns_domain_fmt(const char *domain);
@@ -109,24 +124,12 @@ char *dns_domain_fmt(const char *domain);
 char *dns_fmt_domain(const char *fmt_domain, size_t len);
 //ip 转 string
 char *dns_net_ip(uint32_t ip);
-//解析dns
-MADNS_PACKAGE *dns_resp_parse(MADNS_RESPONSE *resp);
-
-void dns_free_pkg(MADNS_PACKAGE *pkg, size_t cnt);
-
-void dns_free_resp(MADNS_RESPONSE *resp);
-//设置非阻塞套接字
-void dns_set_nonblock(int fd);
 //发起dns请求
 void dns_req(MADNS_CLIENT *client, char* server_ip,uint16_t port,const char *domain);
-//接受数据处理
-void dns_epoll_deal(int fd, MADNS_CLIENT *client);
 //epoll循环
 void dns_client_run(MADNS_CLIENT *client);
 //初始化client
 MADNS_CLIENT *dns_client_init(void (*callback)(MADNS_PACKAGE *pkgs, size_t pkgs_cnt));
-
-void dns_free_client(MADNS_CLIENT* client);
 
 void dns_client_shudown(MADNS_CLIENT* client);
 
