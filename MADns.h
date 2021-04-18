@@ -15,7 +15,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 
-#define EPOLL_SIZE 1024
+#define EPOLL_SIZE 2048
 
 ///< DNS首部标志
 typedef struct _MADNS_HEADER_FLAG

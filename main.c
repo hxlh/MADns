@@ -20,9 +20,16 @@ int main(void)
     pthread_t id;
     pthread_create(&id,NULL,dns_client_run,client);
 
-    for (size_t i = 0; i < 500; i++)
+    for (size_t i = 0; i < 100; i++)
     {
-        dns_req(client, "114.114.114.114", 53, "www.baidu.com");
+        dns_req(client, "223.6.6.6", 53, "www.qq.com");
+        printf("sended: %d\r\n",i);
+        usleep(100000);
+    }
+    for (size_t i = 100; i < 200; i++)
+    {
+        dns_req(client, "114.114.114.114", 53, "www.qq.com");
+        printf("sended: %d\r\n",i);
         usleep(100000);
     }
     sleep(30);

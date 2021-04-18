@@ -376,7 +376,7 @@ void dns_client_run(MADNS_CLIENT *client)
 
     for (;;)
     {
-        size_t event_cnt = epoll_wait(client->epfd, client->ep_event, EPOLL_SIZE, 3000);
+        size_t event_cnt = epoll_wait(client->epfd, client->ep_event, EPOLL_SIZE, 6000);
 
         if (event_cnt == -1)
         {
@@ -385,10 +385,19 @@ void dns_client_run(MADNS_CLIENT *client)
         else if (event_cnt == 0)
         {
             //超时检测
+            /*
+                最长被清理时间：第一次检测后加入，将等待两轮检测才会被请求 timeout*2
+                最短        ：刚加入就被标记，将等待一轮就被请求 timeout*1
+            */
             for (size_t i = 0; i < EPOLL_SIZE; i++)
             {
                 if (client->sock_live[i] == 1)
                 {
+                    //标记待清理
+                    client->sock_live[i]=2;
+                }else if (client->sock_live[i]==2)
+                {
+                    //第二轮才清理
                     epoll_ctl(client->epfd, EPOLL_CTL_DEL, i, NULL);
                     close(i);
                 }
